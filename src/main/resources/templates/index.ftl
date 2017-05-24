@@ -15,16 +15,16 @@
     <script src="/js/dandelion.js"></script>
 </head>
 <body>
-<form action="/upload.html" class="dropzone" id="my-awesome-dropzone"></form>
+<form action="/upload.html" class="dropzone" id="file-upload-dropzone"></form>
 
-<div class="data-sources" ng-controller="MainCtrl">
-<#list Request.FileNames as fileName>
-    <div class="data-source">
-        <button id="button_add" class="btn" data-file="${fileName}"
-                ng-click="load($event, '${fileName}')">${fileName}</button>
+<div class="file-uploader" ng-controller="data-sources-controller">
+    <div class="data-sources">
+    <#list Request.FileNames as fileName>
+        <div class="data-source">
+            <a href="javascript:void(0)" id="button_add" class="source-link" data-file="${fileName}" ng-click="load($event)">${fileName}</a>
+        </div>
+    </#list>
     </div>
-</#list>
-
     <div id="grid1" ui-grid="gridOptions" class="grid"></div>
 </div>
 </body>

@@ -1,6 +1,6 @@
 var app = angular.module('app', ['ngAnimate', 'ngTouch', 'ui.grid']);
 
-app.controller('MainCtrl', ['$scope', '$http', 'uiGridConstants', function ($scope, $http, uiGridConstants) {
+app.controller('data-sources-controller', ['$scope', '$http', 'uiGridConstants', function ($scope, $http, uiGridConstants) {
     $scope.gridOptions = {
         enableSorting: false
     };
@@ -9,7 +9,8 @@ app.controller('MainCtrl', ['$scope', '$http', 'uiGridConstants', function ($sco
         $scope.gridApi = gridApi;
     };
 
-    $scope.load = function ($event, file) {
+    $scope.load = function ($event) {
+        var file = $event.currentTarget.getAttribute('data-file');
         $http.get('/api/datasource?name=' + file).success(function (data) {
             $scope.gridOptions.columnDefs = new Array();
             if (data.length > 0) {
@@ -25,4 +26,11 @@ app.controller('MainCtrl', ['$scope', '$http', 'uiGridConstants', function ($sco
     };
 }]);
 
-// jQuery stuff
+// DropZone options
+Dropzone.options.fileUploadDropzone = {
+    success: function(response) {
+        var fileName = response.name;
+        var $dataSource = $('<div class="data-source"><a href="javascript:void(0)" id="button_add" class="btn" data-file="' + fileName + '" ng-click="load($event)">' + fileName + '</a></div>');
+        $dataSource.appendTo($(".data-sources"));
+    }
+};
