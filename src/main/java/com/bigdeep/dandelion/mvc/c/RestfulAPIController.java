@@ -3,6 +3,7 @@ package com.bigdeep.dandelion.mvc.c;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -44,5 +45,19 @@ public class RestfulAPIController {
             }).collect(Collectors.toList());
         }
         return data;
+    }
+
+    @GetMapping(value = "/action/reverse-string")
+    public Object reverseString(@RequestParam String name, @RequestParam String column) throws IOException {
+        File dataSourceFile = new File(fileUploadDir + File.separator + name);
+        List reversedColumns = new ArrayList();
+        if (dataSourceFile.exists()) {
+            CSVParser parser = CSVFormat.RFC4180.withFirstRecordAsHeader().parse(new FileReader(dataSourceFile));
+            reversedColumns = parser.getRecords().stream().map(record -> {
+                String columnValue = record.get(column);
+                return StringUtils.reverse(columnValue);
+            }).collect(Collectors.toList());
+        }
+        return reversedColumns;
     }
 }
