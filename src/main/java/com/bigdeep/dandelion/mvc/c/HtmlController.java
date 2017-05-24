@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -28,10 +29,10 @@ public class HtmlController {
 
     @RequestMapping(value = {"/index.html", "/", "/index"}, method = RequestMethod.GET)
     public String index(HttpServletRequest request) {
-        List<String> fileNames = ((Collection<File>)FileUtils.listFiles(new File(fileUploadDir), null, false)).stream()
+        List<String> fileNames = new File(fileUploadDir).exists() ? ((Collection<File>) FileUtils.listFiles(new File(fileUploadDir), null, false)).stream()
                 .filter(f -> f.isFile())
                 .map(f -> f.getName())
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()) : new ArrayList();
 
         request.setAttribute("FileNames", fileNames);
         return "index";
