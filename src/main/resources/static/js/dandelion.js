@@ -19,6 +19,11 @@ app.controller('data-sources-controller', ['$scope', '$http', 'uiGridConstants',
                 Object.keys(data[0]).forEach(function (k) {
                     $scope.gridOptions.columnDefs.push({
                         field: k,
+                        width: '*',
+                        minWidth: 30,
+                        dynamicMinWidth: 60,
+                        dynamicMaxWidth: 100,
+                        maxWidth: 150,
                         menuItems: [
                             {
                                 title: 'Reverse String',
