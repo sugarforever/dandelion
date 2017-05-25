@@ -40,6 +40,22 @@ app.controller('data-sources-controller', ['$scope', '$http', 'uiGridConstants',
                                     //console.log($scope.gridOptions.activeDataSource);
                                 },
                                 context: $scope
+                            },
+                            {
+                                title: '转换为日期',
+                                icon: 'ui-grid-icon-info-circled',
+                                action: function ($event) {
+                                    var column = this.context.col.colDef.field;
+                                    var dataSource = $scope.gridOptions.activeDataSource;
+
+                                    $http.get('/api/transform/date-transformer/?name=' + file + '&column=' + column).success(function (data) {
+                                        $scope.updateColumn(column, data);
+                                    });
+                                    //console.log($event);
+                                    //console.log(this.context.col);
+                                    //console.log($scope.gridOptions.activeDataSource);
+                                },
+                                context: $scope
                             }
                         ]
                     });
