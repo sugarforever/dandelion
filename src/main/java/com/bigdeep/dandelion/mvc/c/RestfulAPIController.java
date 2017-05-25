@@ -5,16 +5,18 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.maven.archetype.common.util.FileCharsetDetector;
+import org.mozilla.intl.chardet.nsDetector;
+import org.mozilla.intl.chardet.nsICharsetDetectionObserver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
+import java.nio.charset.Charset;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -37,7 +39,7 @@ public class RestfulAPIController {
         File dataSourceFile = new File(fileUploadDir + File.separator + name);
         List data = new ArrayList();
         if (dataSourceFile.exists()) {
-            CSVParser parser = CSVFormat.RFC4180.withFirstRecordAsHeader().parse(new FileReader(dataSourceFile));
+            CSVParser parser = CSVFormat.RFC4180.withFirstRecordAsHeader().parse(new InputStreamReader(new FileInputStream(dataSourceFile), "UTF-8"));
             final Set<String> headers = parser.getHeaderMap().keySet();
             data = parser.getRecords().stream().map(record -> {
                 Hashtable hash = new Hashtable();
@@ -124,6 +126,49 @@ public class RestfulAPIController {
             writer.flush();
             writer.close();
         }
+
         return reversedColumns;
+    }
+
+    public static String getEncoding(final String filename) throws IOException {
+        // System.out.println("getEncoding: " + filename);
+        final nsDetector det = new nsDetector();
+
+        final BufferedInputStream imp = new BufferedInputStream(new FileInputStream(filename));
+
+        final byte[] buf = new byte[1024];
+        int len;
+        boolean done = false;
+        boolean isAscii = true;
+
+        while ((len = imp.read(buf, 0, buf.length)) != -1) {
+            // Check if the stream is only ascii.
+            if (isAscii) {
+                isAscii = det.isAscii(buf, len);
+            }
+
+            // DoIt if non-ascii and not done yet.
+            if (!isAscii && !done) {
+                done = det.DoIt(buf, len, false);
+            }
+        }
+        det.DataEnd();
+
+        if (isAscii) {
+            return "ASCII";
+        } else {
+            final String prob[] = det.getProbableCharsets();
+            if (prob.length == 0) {
+                throw new IllegalStateException("cannot determine file encoding for : " + filename);
+            }
+
+            for (int i = 0; i < prob.length; i++) {
+                // System.out.println("Probable Charset = " + prob[i]);
+                if (prob[i].equals("windows-1252") || prob[i].equals("UTF-8")) {
+                    return prob[i];
+                }
+            }
+            return prob[0];
+        }
     }
 }
